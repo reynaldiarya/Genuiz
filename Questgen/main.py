@@ -14,7 +14,7 @@ from collections import OrderedDict
 import string
 import pke
 import nltk
-import numpy 
+import numpy
 from nltk import FreqDist
 nltk.download('brown', quiet=True, force=True)
 nltk.download('stopwords', quiet=True, force=True)
@@ -33,7 +33,7 @@ from Questgen.mcq.mcq import generate_normal_questions
 import time
 
 class QGen:
-    
+
     def __init__(self):
 
         self.tokenizer = T5Tokenizer.from_pretrained('t5-large')
@@ -43,25 +43,26 @@ class QGen:
         # model.eval()
         self.device = device
         self.model = model
-        self.nlp = spacy.load('en_core_web_sm', quiet=True)
+        self.nlp = spacy.load('en_core_web_sm')
 
-        self.s2v = Sense2Vec().from_disk('s2v_old')
+        # self.s2v = Sense2Vec().from_disk('s2v_old')
+        self.s2v = Sense2Vec().from_disk('s2v_reddit_2019_lg')
 
         self.fdist = FreqDist(brown.words())
         self.normalized_levenshtein = NormalizedLevenshtein()
         self.set_seed(42)
-        
+
     def set_seed(self,seed):
         numpy.random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
-            
+
     def predict_mcq(self, payload):
         start = time.time()
         inp = {
             "input_text": payload.get("input_text"),
-            "max_questions": payload.get("max_questions", 4)
+            "max_questions": payload.get("max_questions")
         }
 
         text = inp['input_text']
@@ -79,7 +80,7 @@ class QGen:
             text_snippet = " ".join(keyword_sentence_mapping[k][:3])
             keyword_sentence_mapping[k] = text_snippet
 
-   
+
         final_output = {}
 
         if len(keyword_sentence_mapping.keys()) == 0:
@@ -95,12 +96,12 @@ class QGen:
             final_output["statement"] = modified_text
             final_output["questions"] = generated_questions["questions"]
             final_output["time_taken"] = end-start
-            
+
             if torch.device=='cuda':
                 torch.cuda.empty_cache()
-                
+
             return final_output
-    
+
     def predict_shortq(self, payload):
         inp = {
             "input_text": payload.get("input_text"),
@@ -117,7 +118,7 @@ class QGen:
 
 
         keyword_sentence_mapping = get_sentences_for_keyword(keywords, sentences)
-        
+
         for k in keyword_sentence_mapping.keys():
             text_snippet = " ".join(keyword_sentence_mapping[k][:3])
             keyword_sentence_mapping[k] = text_snippet
@@ -128,20 +129,20 @@ class QGen:
             print('ZERO')
             return final_output
         else:
-            
+
             generated_questions = generate_normal_questions(keyword_sentence_mapping,self.device,self.tokenizer,self.model)
             print(generated_questions)
 
-            
+
         final_output["statement"] = modified_text
         final_output["questions"] = generated_questions["questions"]
-        
+
         if torch.device=='cuda':
             torch.cuda.empty_cache()
 
         return final_output
-            
-  
+
+
     def paraphrase(self,payload):
         start = time.time()
         inp = {
@@ -151,7 +152,7 @@ class QGen:
 
         text = inp['input_text']
         num = inp['max_questions']
-        
+
         self.sentence= text
         self.text= "paraphrase: " + self.sentence + " </s>"
 
@@ -177,23 +178,23 @@ class QGen:
             sent = self.tokenizer.decode(beam_output, skip_special_tokens=True,clean_up_tokenization_spaces=True)
             if sent.lower() != self.sentence.lower() and sent not in final_outputs:
                 final_outputs.append(sent)
-        
+
         output= {}
         output['Question']= text
         output['Count']= num
         output['Paraphrased Questions']= final_outputs
-        
+
         for i, final_output in enumerate(final_outputs):
             print("{}: {}".format(i, final_output))
 
         if torch.device=='cuda':
             torch.cuda.empty_cache()
-        
+
         return output
 
 
 class BoolQGen:
-       
+
     def __init__(self):
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
         model = T5ForConditionalGeneration.from_pretrained('ramsrigouthamg/t5_boolean_questions')
@@ -203,7 +204,7 @@ class BoolQGen:
         self.device = device
         self.model = model
         self.set_seed(42)
-        
+
     def set_seed(self,seed):
         numpy.random.seed(seed)
         torch.manual_seed(seed)
@@ -213,7 +214,7 @@ class BoolQGen:
     def random_choice(self):
         a = random.choice([0,1])
         return bool(a)
-    
+
 
     def predict_boolq(self,payload):
         start = time.time()
@@ -236,16 +237,16 @@ class BoolQGen:
         output = beam_search_decoding (input_ids, attention_masks,self.model,self.tokenizer)
         if torch.device=='cuda':
             torch.cuda.empty_cache()
-        
+
         final= {}
         final['Text']= text
         final['Count']= num
         final['Boolean Questions']= output
-            
+
         return final
-            
+
 class AnswerPredictor:
-          
+
     def __init__(self):
         self.tokenizer = T5Tokenizer.from_pretrained('t5-large', model_max_length=512)
         model = T5ForConditionalGeneration.from_pretrained('Parth/boolean')
@@ -255,7 +256,7 @@ class AnswerPredictor:
         self.device = device
         self.model = model
         self.set_seed(42)
-        
+
     def set_seed(self,seed):
         numpy.random.seed(seed)
         torch.manual_seed(seed)
@@ -274,7 +275,7 @@ class AnswerPredictor:
                 "input_question" : payload.get("input_question")
             }
         for ques in payload.get("input_question"):
-                
+
             context = inp["input_text"]
             question = ques
             input = "question: %s <s> context: %s </s>" % (question,context)
