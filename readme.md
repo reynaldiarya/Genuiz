@@ -32,6 +32,3 @@ Pastikan Anda telah menginstal:
 
 ## Kontribusi
 Jika Anda ingin berkontribusi pada proyek ini, silakan *fork* repositori ini, buat *branch* baru untuk perubahan Anda, dan ajukan *pull request*. Pastikan untuk mendokumentasikan perubahan Anda dengan baik.
-
-## Lisensi
-Proyek ini dilisensikan di bawah MIT License. Lihat file [LICENSE](LICENSE) untuk informasi lebih lanjut.
