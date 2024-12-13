@@ -20,7 +20,7 @@ Pastikan Anda telah menginstal:
 
 ## Instalasi
 1. **Unduh Sense2Vec**  
-   Unduh file [Sense2Vec]([https://github.com/explosion/sense2vec](https://github.com/explosion/sense2vec/releases/download/v1.0.0/s2v_reddit_2015_md.tar.gz)) atau sumber lain, lalu ekstrak ke folder proyek ini.  
+   Unduh file [Sense2Vec](https://github.com/explosion/sense2vec/releases/download/v1.0.0/s2v_reddit_2015_md.tar.gz) atau sumber lain, lalu ekstrak ke folder proyek ini.  
 
 2. **Jalankan index.php**  
    Buka server lokal Anda dan arahkan ke `index.php` untuk memulai aplikasi.  
